@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-10-12T09:33:19.564Z",
+  "totalImportedEvents": 10000,
+  "scenariosGenerated": 10000,
+  "successfullyPlayable": 10000,
+  "fallbackScenarios": 10000,
+  "fallbackTiers": {
+    "tier2": 8538,
+    "tier3": 1462
+  },
+  "remainingFailures": 0,
+  "failures": []
+}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Search the Chronicles of Power support FAQ database.">
+  <title>Frequently Asked Questions | Chronicles of Power</title>
+  <link rel="stylesheet" href="/support/support.css">
+  <script defer src="/support/support.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="site-brand" href="/support/" aria-label="Chronicles Support home"><span class="brand-mark">C<span>✳</span>P</span><span>CHRONICLES <i>OF</i> POWER<small>HELP CENTER</small></span></a>
+    <nav class="site-nav" aria-label="Main navigation"><a href="/support/">Home</a><a aria-current="page" href="/support/faqs">FAQs</a><a href="/support/errors">Error codes</a><a href="/support/health">Service health</a><a class="back-to-game" href="/">Back to game</a></nav>
+  </header>
+  <main class="page-shell">
+    <section class="page-intro"><p class="eyebrow"><span class="live-dot"></span> HELP LIBRARY</p><h1>Frequently asked <em>questions.</em></h1><p>Answers are retrieved from the support database. Search by a word or phrase, or filter by category.</p></section>
+    <section class="faq-tools"><label for="faq-search">Search FAQs</label><input id="faq-search" type="search" placeholder="Try “password” or “network error”"><label for="faq-category">Category</label><select id="faq-category"><option value="">All categories</option></select><p id="faq-count" class="muted" aria-live="polite"></p></section>
+    <section id="faq-results" class="faq-list" aria-live="polite"><p class="muted">Loading FAQs…</p></section>
+    <section class="ticket-callout"><div><h2>Still need help?</h2><p>Ask the assistant. When the available sources are not enough, you can submit a support request.</p></div><button class="primary-button" data-open-chat>Ask the Assistant <span aria-hidden="true">↗</span></button></section>
+  </main>
+  <footer class="site-footer"><span>CHRONICLES OF POWER · HELP CENTER</span><nav aria-label="Footer navigation"><a href="/support/">Home</a><a href="/support/errors">Error codes</a><a href="/support/health">Service health</a><a href="/">Return to game</a></nav></footer>
+  <div id="support-chat-root"></div>
+</body>
+</html>

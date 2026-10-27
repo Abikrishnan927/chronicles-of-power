@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-10-12T09:22:13.239Z",
+  "totalRecords": 10000,
+  "uniqueEvents": 10000,
+  "byCentury": {
+    "11th century": 14,
+    "12th century": 37,
+    "13th century": 53,
+    "14th century": 57,
+    "15th century": 64,
+    "16th century": 82,
+    "17th century": 78,
+    "18th century": 172,
+    "19th century": 4443,
+    "20th century": 3393,
+    "21st century": 1607
+  },
+  "byRegion": {
+    "Africa": 266,
+    "Asia / subregion unknown": 93,
+    "Central America and the Caribbean": 285,
+    "Central Asia": 20,
+    "East Asia": 217,
+    "Europe": 2189,
+    "Global / transcontinental": 3,
+    "Global / unknown": 2018,
+    "Middle East": 280,
+    "North America": 3557,
+    "Oceania": 167,
+    "South America": 397,
+    "South Asia": 449,
+    "Southeast Asia": 59
+  },
+  "byCategory": {
+    "Culture and society": 66,
+    "Diplomacy": 488,
+    "Economic event": 2,
+    "Election": 1,
+    "Historical event": 859,
+    "Infrastructure": 3,
+    "Military conflict": 4162,
+    "Natural disaster": 139,
+    "Political change": 3914,
+    "Political or social movement": 362,
+    "Science and technology": 3,
+    "War": 1
+  },
+  "missingDates": 0,
+  "missingDescriptions": 1462,
+  "ambiguousCountries": 1765,
+  "duplicatesRemoved": 2095,
+  "sourceUrlsRetained": 16107,
+  "scenarioReady": 0,
+  "playableCampaigns": 0,
+  "errors": [
+    {
+      "range": "1801-1810",
+      "offset": 0,
+      "message": "HTTP 429"
+    }
+  ],
+  "wikidataBindingsDownloaded": 13714,
+  "wikipediaLinkedEntries": 174,
+  "importBatchCount": 25,
+  "batch": {
+    "startYear": 1801,
+    "endYear": 1810,
+    "region": "South Asia",
+    "downloadedBindings": 0,
+    "duplicatesRemoved": 0
+  }
+}

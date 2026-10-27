@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Check Chronicles of Power support service health.">
+  <title>Service Health | Chronicles of Power</title>
+  <link rel="stylesheet" href="/support/support.css">
+  <script defer src="/support/support.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="site-brand" href="/support/" aria-label="Chronicles Support home"><span class="brand-mark">C<span>✳</span>P</span><span>CHRONICLES <i>OF</i> POWER<small>HELP CENTER</small></span></a>
+    <nav class="site-nav" aria-label="Main navigation"><a href="/support/">Home</a><a href="/support/faqs">FAQs</a><a href="/support/errors">Error codes</a><a aria-current="page" href="/support/health">Service health</a><a class="back-to-game" href="/">Back to game</a></nav>
+  </header>
+  <main class="page-shell">
+    <section class="page-intro"><p class="eyebrow"><span class="live-dot"></span> LIVE DEPENDENCY CHECK</p><h1>Service <em>health.</em></h1><p>The page reports whether services responded to a recent health check. Optional integrations can be unavailable while FAQs remain usable.</p><button class="secondary-button" id="refresh-health" type="button">Refresh status</button><p id="health-updated" class="muted" aria-live="polite"></p></section>
+    <section id="health-overview" class="health-overview" aria-live="polite"><p class="muted">Checking service dependencies…</p></section>
+    <section class="content-section health-note"><h2>What these statuses mean</h2><p><strong>Healthy</strong> means the dependency responded. <strong>Degraded</strong> means the website works but one or more optional services are unavailable. <strong>Unavailable</strong> means a core requirement, such as the SQL FAQ store, is not working.</p><p>Health results never include credentials, connection strings, or internal stack traces.</p></section>
+  </main>
+  <footer class="site-footer"><span>CHRONICLES OF POWER · HELP CENTER</span><nav aria-label="Footer navigation"><a href="/support/">Home</a><a href="/support/faqs">FAQs</a><a href="/support/errors">Error codes</a><a href="/">Return to game</a></nav></footer>
+  <div id="support-chat-root"></div>
+</body>
+</html>

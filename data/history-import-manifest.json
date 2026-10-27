@@ -1,0 +1,215 @@
+{
+  "generatedAt": "2026-10-12T09:10:05.669Z",
+  "totalUniqueRecords": 10000,
+  "wikidataBindingsDownloaded": 13714,
+  "wikipediaLinkedEntries": 174,
+  "duplicatesRemoved": 2095,
+  "batches": [
+    {
+      "key": "wikidata:global:2001-2026",
+      "source": "Wikidata Query Service",
+      "startYear": 2001,
+      "endYear": 2026,
+      "downloadedBindings": 2000,
+      "duplicatesRemoved": 342
+    },
+    {
+      "key": "wikidata:global:1901-1910",
+      "source": "Wikidata Query Service",
+      "startYear": 1901,
+      "endYear": 1910,
+      "downloadedBindings": 882,
+      "duplicatesRemoved": 107
+    },
+    {
+      "key": "wikidata:global:1911-1920",
+      "source": "Wikidata Query Service",
+      "startYear": 1911,
+      "endYear": 1920,
+      "downloadedBindings": 1867,
+      "duplicatesRemoved": 321
+    },
+    {
+      "key": "wikidata:global:1921-1930",
+      "source": "Wikidata Query Service",
+      "startYear": 1921,
+      "endYear": 1930,
+      "downloadedBindings": 1128,
+      "duplicatesRemoved": 98
+    },
+    {
+      "key": "wikidata:global:1931-1940",
+      "source": "Wikidata Query Service",
+      "startYear": 1931,
+      "endYear": 1940,
+      "downloadedBindings": 1166,
+      "duplicatesRemoved": 185
+    },
+    {
+      "key": "wikidata:global:1026-1035",
+      "source": "Wikidata Query Service",
+      "startYear": 1026,
+      "endYear": 1035,
+      "downloadedBindings": 15,
+      "duplicatesRemoved": 1
+    },
+    {
+      "key": "wikidata:global:1101-1110",
+      "source": "Wikidata Query Service",
+      "startYear": 1101,
+      "endYear": 1110,
+      "downloadedBindings": 46,
+      "duplicatesRemoved": 9
+    },
+    {
+      "key": "wikidata:global:1201-1210",
+      "source": "Wikidata Query Service",
+      "startYear": 1201,
+      "endYear": 1210,
+      "downloadedBindings": 91,
+      "duplicatesRemoved": 31
+    },
+    {
+      "key": "wikidata:global:1301-1310",
+      "source": "Wikidata Query Service",
+      "startYear": 1301,
+      "endYear": 1310,
+      "downloadedBindings": 94,
+      "duplicatesRemoved": 28
+    },
+    {
+      "key": "wikidata:global:1401-1410",
+      "source": "Wikidata Query Service",
+      "startYear": 1401,
+      "endYear": 1410,
+      "downloadedBindings": 105,
+      "duplicatesRemoved": 36
+    },
+    {
+      "key": "wikidata:global:1501-1510",
+      "source": "Wikidata Query Service",
+      "startYear": 1501,
+      "endYear": 1510,
+      "downloadedBindings": 102,
+      "duplicatesRemoved": 15
+    },
+    {
+      "key": "wikidata:global:1601-1610",
+      "source": "Wikidata Query Service",
+      "startYear": 1601,
+      "endYear": 1610,
+      "downloadedBindings": 115,
+      "duplicatesRemoved": 34
+    },
+    {
+      "key": "wikidata:global:1701-1710",
+      "source": "Wikidata Query Service",
+      "startYear": 1701,
+      "endYear": 1710,
+      "downloadedBindings": 229,
+      "duplicatesRemoved": 48
+    },
+    {
+      "key": "wikidata:global:1801-1810",
+      "source": "Wikidata Query Service",
+      "startYear": 1801,
+      "endYear": 1810,
+      "downloadedBindings": 528,
+      "duplicatesRemoved": 104
+    },
+    {
+      "key": "wikidata:global:1811-1820",
+      "source": "Wikidata Query Service",
+      "startYear": 1811,
+      "endYear": 1820,
+      "downloadedBindings": 742,
+      "duplicatesRemoved": 116
+    },
+    {
+      "key": "wikidata:global:1821-1830",
+      "source": "Wikidata Query Service",
+      "startYear": 1821,
+      "endYear": 1830,
+      "downloadedBindings": 353,
+      "duplicatesRemoved": 49
+    },
+    {
+      "key": "wikidata:global:1831-1840",
+      "source": "Wikidata Query Service",
+      "startYear": 1831,
+      "endYear": 1840,
+      "downloadedBindings": 478,
+      "duplicatesRemoved": 86
+    },
+    {
+      "key": "wikidata:global:1841-1850",
+      "source": "Wikidata Query Service",
+      "startYear": 1841,
+      "endYear": 1850,
+      "downloadedBindings": 441,
+      "duplicatesRemoved": 46
+    },
+    {
+      "key": "wikidata:global:1851-1860",
+      "source": "Wikidata Query Service",
+      "startYear": 1851,
+      "endYear": 1860,
+      "downloadedBindings": 529,
+      "duplicatesRemoved": 121
+    },
+    {
+      "key": "wikidata:global:1861-1870",
+      "source": "Wikidata Query Service",
+      "startYear": 1861,
+      "endYear": 1870,
+      "downloadedBindings": 1326,
+      "duplicatesRemoved": 164
+    },
+    {
+      "key": "wikidata:global:1871-1880",
+      "source": "Wikidata Query Service",
+      "startYear": 1871,
+      "endYear": 1880,
+      "downloadedBindings": 821,
+      "duplicatesRemoved": 105
+    },
+    {
+      "key": "wikidata:global:1881-1890",
+      "source": "Wikidata Query Service",
+      "startYear": 1881,
+      "endYear": 1890,
+      "downloadedBindings": 656,
+      "duplicatesRemoved": 45
+    },
+    {
+      "key": "wikipedia:2024",
+      "source": "Wikipedia annual event page",
+      "startYear": 2024,
+      "endYear": 2024,
+      "downloadedBindings": 174,
+      "duplicatesRemoved": 1
+    },
+    {
+      "key": "merge:annual-wikidata-aliases",
+      "source": "Cross-source alias merge",
+      "duplicatesRemoved": 3
+    },
+    {
+      "key": "wikidata:South Asia:1801-1810",
+      "source": "Wikidata Query Service (South Asia)",
+      "startYear": 1801,
+      "endYear": 1810,
+      "region": "South Asia",
+      "downloadedBindings": 0,
+      "duplicatesRemoved": 0
+    }
+  ],
+  "apiErrors": [
+    {
+      "source": "Wikidata Query Service",
+      "range": "1801-1810",
+      "region": "South Asia",
+      "message": "HTTP 429"
+    }
+  ]
+}

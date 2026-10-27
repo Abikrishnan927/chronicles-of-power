@@ -1,0 +1,284 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Test project",
+			"type": "shell",
+			"command": "npm test -- --test-reporter=spec",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Test project bypass policy",
+			"type": "shell",
+			"command": "powershell -ExecutionPolicy Bypass -Command \"cmd /c \\\"npm test -- --test-reporter=spec\\\"\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Test project pure cmd",
+			"type": "shell",
+			"command": "cmd.exe /c \"npm test -- --test-reporter=spec\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Test catalogue changes",
+			"type": "shell",
+			"command": "cmd.exe /c \"npm test -- --test-reporter=spec\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Verify catalogue behavior",
+			"type": "shell",
+			"command": "cmd.exe /c \"npm test -- --test-reporter=spec\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Run Chronicles locally",
+			"type": "shell",
+			"command": "cmd.exe /c \"npm run dev\"",
+			"args": [],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run app on verification port",
+			"type": "shell",
+			"command": "cmd.exe /c \"set PORT=8123&& node server.js\"",
+			"args": [],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run app verification server",
+			"type": "shell",
+			"command": "node -e \"const {createServer}=require('./server');const server=createServer().listen(8123,'127.0.0.1',()=>console.log('Chronicles test server ready on 8123'));server.requestTimeout=100000\"",
+			"args": [],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Verify Express on 8123",
+			"type": "shell",
+			"command": "node -e 'const {createServer}=require(\"./server\"); const server=createServer().listen(8123,\"127.0.0.1\",()=>console.log(\"ready\"));'",
+			"args": [],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run local app port 8123",
+			"type": "shell",
+			"command": "$env:PORT='8123'; node server.js",
+			"args": [],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Final catalogue test run",
+			"type": "shell",
+			"command": "cmd.exe /c \"npm test -- --test-reporter=spec\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Final tests after launch fix",
+			"type": "shell",
+			"command": "cmd.exe /c \"npm test -- --test-reporter=spec\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Inspect verification server PID",
+			"type": "shell",
+			"command": "Get-NetTCPConnection -LocalPort 8123 -State Listen | Select-Object -ExpandProperty OwningProcess",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Stop verification server",
+			"type": "shell",
+			"command": "Stop-Process -Id 6524",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Check port 8080 listener",
+			"type": "shell",
+			"command": "Get-NetTCPConnection -LocalPort 8080 -State Listen | Select-Object -ExpandProperty OwningProcess",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Identify 8080 process owners",
+			"type": "shell",
+			"command": "Get-CimInstance Win32_Process | Where-Object { $_.ProcessId -in @(22972,8760) } | Select-Object ProcessId,CommandLine",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Check Ollama availability",
+			"type": "shell",
+			"command": "cmd.exe /c \"curl.exe -i --max-time 5 http://localhost:11434/api/tags\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Check local site",
+			"type": "shell",
+			"command": "cmd.exe /c \"curl.exe -i --max-time 5 http://localhost:3000/api/health\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Capture local model decision output",
+			"type": "shell",
+			"command": "cmd.exe /c \"node -e \\\"const {loadEvents}=require('./server');const {createAIService}=require('./ai-service');const events=loadEvents();const event=events.find(e=>e.scenario&&e.scenario.supportedActions&&e.scenario.supportedActions.length)||events[0];const fetchImpl=async(url,options)=>{const response=await fetch(url,options);if(url.endsWith('/api/chat'))console.log('OLLAMA_RAW_RESPONSE',JSON.stringify((await response.clone().json()).message?.content));return response};const ai=createAIService({events,fetchImpl});ai.decision({eventId:event.id,date:event.date||String(event.year||'1900'),order:'Please negotiate a public agreement and open talks.',state:{stability:50,trust:50,liberties:50,legitimacy:50}}).then(x=>console.log('DECISION_OK',JSON.stringify(x))).catch(e=>{console.log('DECISION_ERROR',e.code,e.message);process.exitCode=1});\\\"\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Test decision diagnostic command",
+			"type": "shell",
+			"command": "cmd.exe /c \"node -e \\\"console.log('node-inline-ok')\\\"\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Inspect decision scenario",
+			"type": "shell",
+			"command": "cmd.exe /c \"node -e \\\"const {loadEvents}=require('./server');const events=loadEvents();const e=events.find(x=>x.scenario&&x.scenario.supportedActions&&x.scenario.supportedActions.length)||events[0];console.log(JSON.stringify({id:e.id,date:e.date,year:e.year,role:e.scenario?.roles?.[0],actions:e.scenario?.supportedActions}));\\\"\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Resolve actual scenario role",
+			"type": "shell",
+			"command": "cmd.exe /c \"node -e \\\"const {loadEvents}=require('./server');const C=require('./universal-scenarios');const e=loadEvents().find(x=>x.id==='emergency');console.log(JSON.stringify(C.build(e)));\\\"\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Inspect live decision output",
+			"type": "shell",
+			"command": "cmd.exe /c \"node -e \\\"const {loadEvents}=require('./server');const {createAIService}=require('./ai-service');const events=loadEvents();const event=events.find(e=>e.id==='emergency');const fetchImpl=async(u,o)=>{const r=await fetch(u,o);if(u.endsWith('/api/chat')){const j=await r.clone().json();console.log('RAW_CONTENT',j.message.content)}return r};const ai=createAIService({events,fetchImpl});ai.decision({eventId:'emergency',date:'25 June 1975',role:'India',state:{stability:55,trust:48,liberties:52,legitimacy:50},order:'Please negotiate a public agreement and open talks.'}).then(x=>console.log('OK',JSON.stringify(x))).catch(e=>console.log('ERROR',e.code,e.message));\\\"\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Verify authored action limits",
+			"type": "shell",
+			"command": "cmd.exe /c \"node -e \\\"const {loadEvents}=require('./server');const e=loadEvents().find(x=>x.id==='emergency');console.log(JSON.stringify({scenarioActions:e.scenario?.supportedActions,scenario:e.scenario?.title}));\\\"\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Identify validator rejection condition",
+			"type": "shell",
+			"command": "cmd.exe /c \"node -e \\\"const C=require('./universal-scenarios'),{loadEvents}=require('./server');const e=loadEvents().find(x=>x.id==='emergency'),allowed=C.build(e).supportedActions,p={summary:'Open dialogue and negotiation',intention:'speculative',actionText:'Open dialogue and negotiation',requirements:['Open dialogue and negotiation'],risks:[],possibleConsequences:['Strengthen protections and oversight','Increase executive control'],clarificationQuestions:[]},keys=['summary','intention','actionText','requirements','risks','possibleConsequences','clarificationQuestions'];const validList=v=>Array.isArray(v)&&v.length<=5&&v.every(x=>typeof x==='string'&&x.trim().length>0&&x.length<=500);console.log(JSON.stringify({allowed,exactKeys:Object.keys(p).length===keys.length&&keys.every(k=>Object.hasOwn(p,k)),summary:!!p.summary.trim(),intention:!!p.intention.trim(),actionAllowed:allowed.includes(p.actionText),lists:[p.requirements,p.risks,p.possibleConsequences,p.clarificationQuestions].map(validList)}));\\\"\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Trace decision validation branch",
+			"type": "shell",
+			"command": "cmd.exe /c \"node -e \\\"const E=require('./engine');const original=E.interpretAction;E.interpretAction=(...args)=>{const result=original(...args);console.log('ENGINE_INTERPRET',JSON.stringify({text:args[0],context:args[1],result}));return result};const {loadEvents}=require('./server');const {createAIService}=require('./ai-service');const events=loadEvents();const event=events.find(e=>e.id==='emergency');const ai=createAIService({events,fetchImpl:async(u,o)=>{const r=await fetch(u,o);if(u.endsWith('/api/chat'))console.log('MODEL',JSON.stringify((await r.clone().json()).message.content));return r}});ai.decision({eventId:'emergency',date:'25 June 1975',role:'India',state:{stability:55,trust:48,liberties:52,legitimacy:50},order:'Please negotiate a public agreement and open talks.'}).then(v=>console.log('RESULT',JSON.stringify(v))).catch(e=>console.log('FAILED',e.code,e.message));\\\"\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Check Ollama version",
+			"type": "shell",
+			"command": "cmd.exe /c \"curl.exe -sS http://localhost:11434/api/version\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Verify repaired live model decision",
+			"type": "shell",
+			"command": "cmd.exe /c \"node -e \\\"const {loadEvents}=require('./server');const {createAIService}=require('./ai-service');const events=loadEvents();const ai=createAIService({events});ai.decision({eventId:'emergency',date:'25 June 1975',role:'India',state:{stability:55,trust:48,liberties:52,legitimacy:50},order:'Please negotiate a public agreement and open talks.'}).then(x=>console.log(JSON.stringify({summary:x.summary,interpretation:x.interpretation,actions:x.actions,engineAction:x.engineAction,hasEffects:!!x.effects,warning:x.warning}))).catch(e=>{console.error(e.code,e.message);process.exitCode=1});\\\"\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Find active site process",
+			"type": "shell",
+			"command": "cmd.exe /c \"netstat -ano | findstr LISTENING | findstr :3000\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Restart site with AI fix",
+			"type": "shell",
+			"command": "cmd.exe /c \"powershell.exe -NoProfile -Command Stop-Process -Id 12572\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Stop old site process",
+			"type": "shell",
+			"command": "Stop-Process -Id 12572",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

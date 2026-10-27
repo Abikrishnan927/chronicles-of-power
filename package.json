@@ -1,0 +1,27 @@
+{
+  "name": "chronicles-of-power",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chronicles of Power browser game and local Wikimedia historical event importer",
+  "scripts": {
+    "start": "node server.js",
+    "import:history": "node scripts/history-pipeline.mjs import",
+    "import:wikidata": "node scripts/import-wikidata-events.mjs",
+    "update:history": "node scripts/history-pipeline.mjs update",
+    "report:history": "node scripts/history-pipeline.mjs report",
+    "test": "node --test tests/*.test.js",
+    "init:support": "node scripts/init-support-db.js",
+    "test:history": "node --test tests/simulation.test.js",
+    "report:scenarios": "node scripts/validate-scenarios.mjs",
+    "test:scenarios": "node --test tests/scenario-validation.test.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongodb": "^6.17.0",
+    "sql.js": "^1.13.0"
+  }
+}
