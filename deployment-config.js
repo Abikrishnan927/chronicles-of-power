@@ -1,15 +1,19 @@
 (function () {
   const scriptUrl = document.currentScript?.src || location.href;
   const basePath = new URL('.', scriptUrl).pathname;
+  const backendBaseUrl = window.COP_BACKEND_API_BASE_URL || null;
+  const accountApiBaseUrl = window.COP_ACCOUNT_API_BASE_URL || null;
   window.COPDeployment = Object.freeze({
     basePath,
-    backendConfigured: false,
-    backendBaseUrl: null,
+    backendConfigured: Boolean(backendBaseUrl),
+    backendBaseUrl,
+    accountApiConfigured: Boolean(accountApiBaseUrl),
+    accountApiBaseUrl,
     asset(path) {
       return new URL(String(path).replace(/^\/+/, ''), `${location.origin}${basePath}`).href;
     },
     api(path) {
-      if (!this.backendConfigured) {
+      if (!this.backendConfigured || !this.backendBaseUrl) {
         const error = new Error('This feature requires a separately hosted Node.js backend.');
         error.code = 'BACKEND_NOT_CONFIGURED';
         error.title = 'Backend Required';
@@ -18,8 +22,7 @@
         error.retryable = false;
         throw error;
       }
-      const base = this.backendBaseUrl || location.origin;
-      return new URL(String(path).replace(/^\/+/, ''), `${base.replace(/\/+$/, '')}/`).href;
+      return new URL(String(path).replace(/^\/+/, ''), `${this.backendBaseUrl.replace(/\/+$/, '')}/`).href;
     }
   });
 }());

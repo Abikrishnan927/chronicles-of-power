@@ -18,8 +18,21 @@ test('static deployment config resolves assets beneath the GitHub Pages project 
   const deployment = context.window.COPDeployment;
   assert.equal(deployment.basePath, '/chronicles-of-power/');
   assert.equal(deployment.backendConfigured, false);
+  assert.equal(deployment.accountApiConfigured, false);
   assert.equal(deployment.asset('data/history-events.json'), 'https://abikrishnan927.github.io/chronicles-of-power/data/history-events.json');
   assert.throws(() => deployment.api('api/history/events'), error => error.code === 'BACKEND_NOT_CONFIGURED');
+});
+
+test('static deployment can be configured for a separately hosted Django account API', () => {
+  const context = {
+    window: { COP_ACCOUNT_API_BASE_URL: 'https://accounts.example.test' },
+    location: { href: 'https://example.test/chronicles-of-power/', origin: 'https://example.test' },
+    document: { currentScript: { src: 'https://example.test/chronicles-of-power/deployment-config.js' } },
+    URL
+  };
+  vm.runInNewContext(fs.readFileSync(require.resolve('../deployment-config.js'), 'utf8'), context);
+  assert.equal(context.window.COPDeployment.accountApiConfigured, true);
+  assert.equal(context.window.COPDeployment.accountApiBaseUrl, 'https://accounts.example.test');
 });
 
 test('static catalogue loader reads the bundled records and preserves 1,000-record page slices', async () => {
@@ -76,7 +89,7 @@ test('static catalogue loader reads the bundled records and preserves 1,000-reco
   assert.equal(window.COPCatalogStatus.imported, 10000);
   assert.equal(window.COPCatalogStatus.pages, 10);
   assert.equal(window.COPImportedEvents.length, 10000);
-  assert.equal(scripts.length, 6);
+  assert.equal(scripts.length, 7);
   assert.ok(scripts.every(url => url.startsWith(`${origin}/chronicles-of-power/`)));
 });
 
@@ -91,7 +104,7 @@ test('static files and the existing catalogue are served under the GitHub Pages 
   for (const asset of [
     '/', '/deployment-config.js', '/styles.css', '/catalog-loader.js', '/support-error.js',
     '/catalog-index.js', '/campaign-data.js', '/engine.js', '/universal-scenarios.js',
-    '/app.js', '/ai-ui.js', '/support/support.css', '/support/support.js',
+    '/app.js', '/ai-ui.js', '/account-ui.js', '/support/support.css', '/support/support.js',
     '/support-catalog.js', '/data/history-events.json'
   ]) {
     const response = await fetch(`${base}${asset}`);

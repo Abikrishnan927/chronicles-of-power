@@ -11,11 +11,27 @@ function loadEvents(){const sandbox={window:{COPImportedEvents:loadImportedEvent
 function createServer({ai=createAIService({events:loadEvents()}),support={}}={}){
   const app=express();
   app.disable('x-powered-by');
+  if(process.env.NODE_ENV==='production')app.set('trust proxy',1);
+  const allowedOrigins=(process.env.CORS_ALLOWED_ORIGINS||'').split(',').map(value=>value.trim()).filter(Boolean);
+  app.use((req,res,next)=>{
+    const origin=req.get('origin');
+    if(origin&&allowedOrigins.includes(origin)){
+      res.setHeader('Access-Control-Allow-Origin',origin);
+      res.setHeader('Vary','Origin');
+      res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers','Content-Type, X-Request-Id');
+    }else if(origin&&allowedOrigins.length&&req.path.startsWith('/api/')){
+      return res.status(403).json({error:{code:'403',title:'Forbidden',message:'This website origin is not allowed to use the API.',retryable:false}});
+    }
+    if(req.method==='OPTIONS')return res.sendStatus(204);
+    next();
+  });
   app.use(createSupportRequestLogger(support.logger));
   app.use(express.json({limit:'32kb',strict:true}));
   app.get('/deployment-config.js',(req,res)=>{
     const backendBaseUrl=process.env.PUBLIC_API_BASE_URL||'';
-    res.type('application/javascript').send(`window.COPDeployment=Object.freeze({basePath:new URL('.',document.currentScript.src).pathname,backendConfigured:true,backendBaseUrl:${JSON.stringify(backendBaseUrl)},asset(path){return new URL(String(path).replace(/^\\/+/,''),location.origin+this.basePath).href;},api(path){const base=this.backendBaseUrl||location.origin;return new URL(String(path).replace(/^\\/+/,''),base.replace(/\\/+$/,'')+'/').href;}});`);
+    const accountApiBaseUrl=process.env.ACCOUNT_API_BASE_URL||'';
+    res.type('application/javascript').send(`window.COPDeployment=Object.freeze({basePath:new URL('.',document.currentScript.src).pathname,backendConfigured:true,backendBaseUrl:${JSON.stringify(backendBaseUrl)},accountApiConfigured:${Boolean(accountApiBaseUrl)},accountApiBaseUrl:${JSON.stringify(accountApiBaseUrl)},asset(path){return new URL(String(path).replace(/^\\/+/,''),location.origin+this.basePath).href;},api(path){const base=this.backendBaseUrl||location.origin;return new URL(String(path).replace(/^\\/+/,''),base.replace(/\\/+$/,'')+'/').href;}});`);
   });
   createSupportRoutes(app,support);
   const importedEvents=loadImportedEvents();
@@ -24,7 +40,9 @@ function createServer({ai=createAIService({events:loadEvents()}),support={}}={})
     if(!/^(0|[1-9]\d*)$/.test(String(offsetText))||!/^[1-9]\d*$/.test(String(limitText)))return sendApiError(req,res,400,'offset must be a non-negative integer and limit must be a positive integer.',{retryable:false});
     const offset=Number(offsetText),limit=Number(limitText);
     if(!Number.isSafeInteger(offset)||!Number.isSafeInteger(limit)||limit>1000)return sendApiError(req,res,400,'limit must be between 1 and 1000 and offset must be a safe integer.',{retryable:false});
-    res.json({events:importedEvents.slice(offset,offset+limit),total:importedEvents.length,offset,limit});
+    const query=String(req.query.q||'').trim().toLowerCase().slice(0,100);
+    const matching=query?importedEvents.filter(event=>[event.title,event.summary,event.description,event.country,...(event.countries||[]),...(event.people||[])].filter(Boolean).join(' ').toLowerCase().includes(query)):importedEvents;
+    res.json({events:matching.slice(offset,offset+limit),total:matching.length,offset,limit});
   });
   app.get('/api/game/health',async(req,res)=>{const health=await ai.health();const ok=health.available&&health.modelAvailable;const unavailable=!health.available;res.status(ok?200:503).json({...health,ok,provider:'local-ollama',...(!ok?{error:buildApiError(req,503,unavailable?'The local game AI service is not responding.':'The configured game AI model is unavailable.',{siteCode:null,cause:unavailable?'The local Ollama service could not be reached.':'The configured model is not available in Ollama.',steps:unavailable?['Check that Ollama is running.','Retry the health check.']:['Check the configured model name.','Install the model using the setup instructions.']})}:{})});});
   const route=method=>async(req,res,next)=>{try{res.json(await ai[method](req.body));}catch(error){next(error);}};
@@ -32,6 +50,7 @@ function createServer({ai=createAIService({events:loadEvents()}),support={}}={})
   app.post('/api/ai/advisor',route('advisor'));
   app.post('/api/ai/diplomacy',route('diplomacy'));
   app.post('/api/ai/events',route('proposeEvent'));
+  app.use((req,res,next)=>/^\/(?:backend|scripts|tests|\.private|node_modules)(?:\/|$)/.test(req.path)?res.status(404).end():next());
   app.use(express.static(__dirname,{dotfiles:'deny',index:'index.html',fallthrough:true}));
   createSupportFallback(app,support);
   return app;
@@ -39,6 +58,6 @@ function createServer({ai=createAIService({events:loadEvents()}),support={}}={})
 if(require.main===module){
   loadLocalEnv();
   let ai;try{ai=createAIService({events:loadEvents()});}catch(error){console.error(`[Chronicles AI] Configuration error: ${error.message}`);process.exitCode=1;}
-  if(ai){const port=Number(process.env.PORT)||3000,host=process.env.HOST||'127.0.0.1';const server=createServer({ai}).listen(port,host,()=>console.log(`Chronicles of Power ready at http://localhost:${port} (Ollama model: ${ai.model})`));server.requestTimeout=100000;}
+  if(ai){const port=Number(process.env.PORT)||3000,host=process.env.HOST||(process.env.NODE_ENV==='production'?'0.0.0.0':'127.0.0.1');const server=createServer({ai}).listen(port,host,()=>console.log(`Chronicles of Power API listening on ${host}:${port} (game AI model: ${ai.model})`));server.requestTimeout=100000;}
 }
 module.exports={createServer,loadEvents,loadImportedEvents,loadLocalEnv};

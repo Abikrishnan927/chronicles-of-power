@@ -74,6 +74,9 @@ test('FAQ API, error catalogue, and health endpoint report truthful dependency s
   assert.equal(healthData.services.sql.status, 'healthy');
   assert.equal(healthData.services.mongodb.status, 'unavailable');
   assert.equal(healthData.provider, 'test-ai');
+  const renderHealth = await fetch(`${base}/health`);
+  assert.equal(renderHealth.status, 200);
+  assert.equal((await renderHealth.json()).ok, true);
 });
 
 test('chat answers with FAQ references and reports MongoDB save failures truthfully', async t => {

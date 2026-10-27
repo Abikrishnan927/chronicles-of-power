@@ -65,6 +65,27 @@ function createSupportRequestLogger(logger = console) {
   };
 }
 
+function createRateLimiter({ limit, windowMs, message }) {
+  const buckets = new Map();
+  return (req, res, next) => {
+    const now = Date.now();
+    const key = req.ip || req.socket.remoteAddress || 'unknown';
+    let bucket = buckets.get(key);
+    if (!bucket || now >= bucket.resetAt) {
+      bucket = { count: 0, resetAt: now + windowMs };
+      buckets.set(key, bucket);
+    }
+    bucket.count += 1;
+    if (bucket.count > limit) {
+      return sendApiError(req, res, 429, message, { retryAfter: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)) });
+    }
+    if (buckets.size > 5000) {
+      for (const [address, entry] of buckets) if (now >= entry.resetAt) buckets.delete(address);
+    }
+    next();
+  };
+}
+
 function createSupportRoutes(app, {
   store = createSupportStore(),
   mongo = createSupportLogger(),
@@ -91,6 +112,9 @@ function createSupportRoutes(app, {
   }
 
   const asyncRoute = handler => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
+  app.post('/api/support/chat', createRateLimiter({ limit: 20, windowMs: 60_000, message: 'Please wait before sending another assistant question.' }));
+  app.post('/api/support/tickets', createRateLimiter({ limit: 5, windowMs: 60 * 60_000, message: 'Too many support tickets were submitted. Please try again later.' }));
+  app.post('/api/support/feedback', createRateLimiter({ limit: 30, windowMs: 60 * 60_000, message: 'Please wait before sending more feedback.' }));
   const withStore = async operation => {
     try {
       await store.ready;
@@ -288,7 +312,7 @@ function createSupportRoutes(app, {
     res.status(201).json({ saved: true });
   }));
 
-  app.get('/api/health', asyncRoute(async (req, res) => {
+  const healthHandler = asyncRoute(async (req, res) => {
     const checks = await Promise.allSettled([
       store.health(),
       mongo.health(),
@@ -324,12 +348,14 @@ function createSupportRoutes(app, {
         ...body,
         error: buildApiError(req, 503, 'The support database is temporarily unavailable. FAQ and ticket operations cannot be completed.', {
           cause: 'The SQL support database is not responding to its health check.',
-          steps: ['Wait briefly and check again.', 'Verify the configured SQLite database path and available disk space.']
+          steps: ['Wait briefly and check again.', 'Verify DATABASE_URL and the PostgreSQL provider status.']
         })
       });
     }
     res.json(body);
-  }));
+  });
+  app.get('/api/health', healthHandler);
+  app.get('/health', healthHandler);
 
   app.use('/support', express.static(SUPPORT_DIR, { dotfiles: 'deny', index: false, fallthrough: true }));
 }
@@ -437,4 +463,4 @@ function sendErrorPage(req, res, status, file) {
   res.status(status).type('html').send(html);
 }
 
-module.exports = { createSupportRequestLogger, createSupportRoutes, createSupportFallback, cleanText, sendApiError, buildApiError };
+module.exports = { createSupportRequestLogger, createSupportRoutes, createSupportFallback, createRateLimiter, cleanText, sendApiError, buildApiError };

@@ -31,14 +31,23 @@ test('low confidence or unsupported questions offer ticket escalation', async ()
   assert.equal(answer.escalated, true);
 });
 
-test('provider connection failures retain a retryable 503 service error', async () => {
+test('provider connection failures fall back to the matching FAQ and retain an escalation path when sources are absent', async () => {
   const assistant = createSupportAI({
     fetchImpl: async () => { throw new TypeError('internal network diagnostic'); }
   });
-  await assert.rejects(
-    assistant.answer('How can I reset my password?', [faq]),
-    error => error.status === 503 && error.code === 'ai_unavailable' && /provider is unavailable/i.test(error.message)
-  );
+  const answer = await assistant.answer('How can I reset my password?', [faq]);
+  assert.match(answer.answer, /Forgot password/);
+  assert.deepEqual(answer.faqIds, [2]);
+  const unknown = await assistant.answer('How do I repair a fictional device?', []);
+  assert.equal(unknown.escalated, true);
+});
+
+test('OpenAI-compatible support works from FAQ records with no AI key configured', async () => {
+  const assistant = createSupportAI({ provider: 'openai-compatible', apiKey: '' });
+  const answer = await assistant.answer('How can I reset my password?', [faq]);
+  assert.match(answer.answer, /Forgot password/);
+  assert.equal(answer.provider, 'faq-fallback');
+  assert.equal((await assistant.health()).available, false);
 });
 
 test('error-code questions are grounded in the error guide, not incorrectly escalated for missing FAQ rows', async () => {

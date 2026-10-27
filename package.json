@@ -5,6 +5,7 @@
   "description": "Chronicles of Power browser game and local Wikimedia historical event importer",
   "scripts": {
     "start": "node server.js",
+    "build": "node scripts/build-frontend.mjs",
     "import:history": "node scripts/history-pipeline.mjs import",
     "import:wikidata": "node scripts/import-wikidata-events.mjs",
     "update:history": "node scripts/history-pipeline.mjs update",
@@ -22,6 +23,7 @@
   "dependencies": {
     "express": "^5.2.1",
     "mongodb": "^6.17.0",
+    "pg": "^8.23.1",
     "sql.js": "^1.13.0"
   }
 }

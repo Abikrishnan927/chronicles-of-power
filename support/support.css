@@ -138,6 +138,7 @@ h1 em { color: var(--gold-light); font-weight: 500; }
 .chat-notice.hidden { display: none; }
 .chat-messages { flex: 1; min-height: 0; overflow-y: auto; padding: 13px; }
 .chat-message { max-width: 96%; margin: 0 0 12px; padding: 11px 12px; border: 1px solid var(--line); background: #142027; }
+#support-chat-root .chat-message { display: block; min-width: 0; overflow-wrap: anywhere; }
 .chat-message.user { margin-left: auto; border-color: #d7bc7b66; background: #25241e; }
 .message-label { display: block; margin-bottom: 5px; color: var(--gold); font: 9px "Consolas", monospace; letter-spacing: 1px; }
 .message-text { margin: 0; overflow-wrap: anywhere; font-size: 13px; }

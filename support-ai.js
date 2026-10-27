@@ -9,6 +9,7 @@ function createSupportAI({
   timeoutMs = Number(process.env.AI_TIMEOUT_MS) || 90000
 } = {}) {
   if (!['ollama', 'openai-compatible'].includes(provider)) throw new TypeError('AI_PROVIDER must be ollama or openai-compatible.');
+  const aiConfigured = provider !== 'openai-compatible' || Boolean(apiKey);
   let parsed;
   try { parsed = new URL(baseUrl); } catch { throw new TypeError('AI_BASE_URL must be a valid URL.'); }
   const loopback = ['127.0.0.1', 'localhost', '[::1]', '::1'].includes(parsed.hostname);
@@ -16,7 +17,7 @@ function createSupportAI({
   if (provider === 'ollama' && (parsed.protocol !== 'http:' || !loopback)) {
     throw new TypeError('Ollama must use a loopback HTTP address.');
   }
-  if (provider === 'openai-compatible' && (!apiKey || (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && loopback)))) {
+  if (provider === 'openai-compatible' && aiConfigured && (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && loopback))) {
     throw new TypeError('AI_API_KEY and an HTTPS AI_BASE_URL are required for openai-compatible (HTTP is allowed only on loopback).');
   }
   const basePath = parsed.pathname.replace(/\/+$/, '');
@@ -66,6 +67,37 @@ function createSupportAI({
 
   return {
     async answer(question, faqs, conversation = []) {
+      const fallback = () => {
+        const normalized = question.toLowerCase();
+        const errorCode = ERROR_CODES.find(item => normalized.includes(item.code.toLowerCase()) || normalized.includes(item.title.toLowerCase()));
+        if (errorCode) return {
+          answer: `${errorCode.code} — ${errorCode.title}: ${errorCode.explanation} ${errorCode.steps.join(' ')}`,
+          confidence: 0.98,
+          faqIds: [],
+          errorCodeReferences: [{ code: errorCode.code, title: errorCode.title }],
+          escalated: false,
+          provider: 'faq-fallback'
+        };
+        const terms = normalized.match(/[a-z0-9-]+/g)?.filter(term => term.length >= 3) || [];
+        const ranked = faqs.map(faq => ({ faq, score: terms.reduce((count, term) => count + (`${faq.question} ${faq.answer} ${faq.category}`.toLowerCase().includes(term) ? 1 : 0), 0) }))
+          .filter(item => item.score > 0).sort((a, b) => b.score - a.score);
+        if (ranked.length) return {
+          answer: `${ranked[0].faq.answer}${ranked.length > 1 ? ` Related FAQ: ${ranked[1].faq.question}` : ''}`,
+          confidence: 0.82,
+          faqIds: ranked.slice(0, 3).map(item => item.faq.id),
+          errorCodeReferences: [],
+          escalated: false,
+          provider: 'faq-fallback'
+        };
+        return {
+          answer: 'I could not find a supported answer in the FAQ or error-code records. You can create a support ticket and include the page and what you were trying to do.',
+          confidence: 0.1,
+          faqIds: [],
+          errorCodeReferences: [],
+          escalated: true,
+          provider: 'faq-fallback'
+        };
+      };
       const faqContext = faqs.map(faq => ({ id: faq.id, question: faq.question, answer: faq.answer, category: faq.category }));
       const terms = question.toLowerCase().match(/[a-z0-9-]+/g)?.filter(term => term.length >= 3 && !['the', 'and', 'for', 'with', 'how', 'can', 'what', 'does'].includes(term)) || [];
       const errorContext = ERROR_CODES.map(item => {
@@ -77,7 +109,13 @@ function createSupportAI({
         { role: 'system', content: 'Answer support questions only from the supplied FAQs and error-code guide. Do not invent instructions or policies. If sources are insufficient, say so and set confidence below 0.55. Return JSON: answer, confidence from 0 to 1, and faqIds from the supplied records.' },
         { role: 'user', content: JSON.stringify({ question, faqs: faqContext, errorCodes: errorContext, previousMessages: conversation.slice(-4) }) }
       ];
-      const result = await request(messages);
+      if (!aiConfigured) return fallback();
+      let result;
+      try {
+        result = await request(messages);
+      } catch {
+        return fallback();
+      }
       const validIds = new Set(faqContext.map(faq => faq.id));
       const faqIds = Array.isArray(result.faqIds) ? result.faqIds.filter(id => Number.isInteger(id) && validIds.has(id)).slice(0, 5) : [];
       const errorCodeReferences = ERROR_CODES.filter(item =>
@@ -93,6 +131,7 @@ function createSupportAI({
       };
     },
     async health() {
+      if (!aiConfigured) return { available: false, modelAvailable: false, provider: 'faq-fallback', model };
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), Math.min(timeoutMs, 2500));
       try {

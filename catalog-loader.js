@@ -2,7 +2,7 @@
   const pageSize = 1000;
   const pages = new Map();
   const loadedScripts = new Set();
-  const scripts = ['catalog-index.js', 'campaign-data.js', 'engine.js', 'universal-scenarios.js', 'app.js', 'ai-ui.js'];
+  const scripts = ['catalog-index.js', 'campaign-data.js', 'engine.js', 'universal-scenarios.js', 'app.js', 'ai-ui.js', 'account-ui.js'];
   let staticEventsPromise = null;
   let total = null;
   let running = false;
