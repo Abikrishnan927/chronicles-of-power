@@ -12,6 +12,7 @@
       errorOperation: String(operation || 'using the game').slice(0, 80)
     });
     if (error.siteCode) params.set('errorSiteCode', String(error.siteCode).slice(0, 30));
-    return `/support/?${params}`;
+    const supportUrl = window.COPDeployment?.asset('support/index.html') || 'support/index.html';
+    return `${supportUrl}?${params}`;
   };
 }());

@@ -61,7 +61,7 @@ The health indicator in **The Archivist** shows whether Ollama and the configure
 
 ## Historical event archive
 
-`data/history-events.json` is the canonical imported catalog. It currently contains **10,000 unique imported records**; the full browser catalogue contains **10,007 unique records** after adding the seven authored campaigns. On startup, `catalog-loader.js` fetches the imported data from `/api/history/events` in bounded pages of up to 1,000 records, checks the total and unique IDs, then builds one shared catalogue for Campaigns and History Archive. If a page fails, successful pages stay cached in memory and Retry requests only missing pages. Both views search/filter the complete indexed dataset and automatically append records as you scroll, while keeping at most 108 cards in the DOM. The generated report is `data/history-report.json`; the catalog combines Wikipedia's 2024 annual events page with structured Wikidata results.
+`data/history-events.json` is the canonical imported catalog. It currently contains **10,000 unique imported records**; the full browser catalogue contains **10,007 unique records** after adding the seven authored campaigns. With the local Node backend, `catalog-loader.js` fetches the imported data from `/api/history/events` in bounded pages of up to 1,000 records. On static hosting, it loads the same bundled JSON file and slices the records into equivalent 1,000-record pages in the browser. Both modes validate unique IDs before building the shared Campaigns and History Archive catalogue. If a page fails in backend mode, successful pages stay cached and Retry requests only missing pages. Both views search/filter the complete indexed dataset and automatically append records as you scroll, while keeping at most 108 cards in the DOM. The generated report is `data/history-report.json`; the catalog combines Wikipedia's 2024 annual events page with structured Wikidata results.
 
 The importers read annual event pages on English Wikipedia and query structured Wikidata event records, retaining source URLs and retrieval timestamps. Date precision is preserved, so a year-only date remains year-only. Wikipedia text is available under CC BY-SA 4.0; Wikidata structured data is CC0 1.0. Records are attributed but **unverified**: machine extraction does not establish historical accuracy. The sample represents every century from the 11th through the 21st, but older periods use selected 10-year windows rather than every year. By century, the report counts 14, 37, 53, 57, 64, 82, 78, 172, 4,443, 3,393, and 1,607 events respectively (11th through 21st). Coverage is uneven: North America 3,557; Europe 2,189; South Asia 449; East Asia 217; Southeast Asia 59; Central Asia 20; Middle East 280; Africa 266; Oceania 167; Central America and Caribbean 285; South America 397; and global/unknown 2,018. The report flags 1,765 records without an evidenced country and 1,462 without a description. It retains 16,107 source URLs; 13,714 Wikidata result bindings and 174 Wikipedia event links were processed, with 2,095 duplicate candidates removed across batches. No imported record is marked scenario-ready or playable. The global batches completed without API errors. A later country-scoped South Asia query returned HTTP 429 and added no records; that rate-limit response is logged in the report. These are source coverage limits, not verified historical completeness.
 
@@ -234,5 +234,22 @@ The portal checks the backend, SQLite, MongoDB, AI provider, and GitHub Status. 
 ### Deployment, limitations, and next improvement
 
 **Live Demo: Not deployed yet.** The app has not been deployed or verified on a hosting provider. To deploy, use a Node.js host such as Render for the Express app, configure `HOST=0.0.0.0` and the other environment variables in the host's secret manager, attach persistent storage for `.private/support.sqlite`, and use a managed MongoDB deployment if chat logging is wanted. Configure an AI provider reachable from that host; a loopback Ollama URL only works when Ollama runs on the same host. Test the public health and 404 endpoints after deployment.
+
+#### GitHub Pages static deployment
+
+The browser game and its historical data can run as static files; GitHub Pages does not run `server.js`. The static deployment uses `deployment-config.js` to derive the repository subpath (for example `/chronicles-of-power/`), loads `data/history-events.json` directly, and never requests a local or assumed `/api` server. MapLibre tiles and place lookup still require internet access. AI chat, game AI, support tickets, SQL/SQLite operations, MongoDB logging/feedback, and live service health require the Node backend and are clearly marked unavailable on static hosting. The FAQ and error-code references continue to work from the bundled public support catalog.
+
+To publish from the repository root, select **Settings → Pages → Deploy from a branch**, choose the branch containing the fix and the `/ (root)` folder, then save. GitHub Pages will publish `index.html`, `deployment-config.js`, `data/history-events.json`, and the other relative assets under the repository subpath. Alternatively, commit and push the changes to the branch already configured for Pages:
+
+```bat
+git add index.html catalog-loader.js deployment-config.js data/history-events.json
+git add ai-ui.js support-error.js support-catalog.js support
+git add server.js tests
+git add README.md
+git commit -m "Fix GitHub Pages static catalogue"
+git push origin main
+```
+
+Use the configured branch name if it is not `main`. For a separately hosted Node backend, set the public `backendBaseUrl` and `backendConfigured: true` in the static `deployment-config.js`, ensure the backend permits browser CORS from the Pages origin, and never put private credentials in that file. The local Express server supplies an API-enabled deployment config automatically; an empty `PUBLIC_API_BASE_URL` uses the same origin.
 
 The support portal has no user authentication or public ticket lookup; it deliberately avoids exposing ticket details. MongoDB, an AI provider, and the external status API require their respective services/network access and are reported unavailable when they cannot be reached. **Proposed future improvement:** add authenticated ticket status updates and a support-agent workflow.

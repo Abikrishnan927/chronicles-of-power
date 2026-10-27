@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <base href="./" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#090d12" />
   <meta name="description" content="Explore the turning points of history. Your choices write another timeline." />
@@ -16,7 +17,7 @@
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" href="#map" aria-label="Chronicles of Power home"><span class="brand-mark">C<span>✳</span>P</span><span class="brand-name">CHRONICLES <i>OF</i> POWER</span></a>
-      <nav class="main-nav" aria-label="Main navigation"><button class="nav-link active" data-view="map">World map</button><button class="nav-link" data-view="library">Campaigns</button><button class="nav-link" data-view="archive">History archive</button><a class="support-nav-link" href="/support/">Support</a></nav>
+      <nav class="main-nav" aria-label="Main navigation"><button class="nav-link active" data-view="map">World map</button><button class="nav-link" data-view="library">Campaigns</button><button class="nav-link" data-view="archive">History archive</button><a class="support-nav-link" href="support/index.html">Support</a></nav>
       <div class="top-actions"><button class="icon-button" id="sound-toggle" aria-label="Toggle sound" title="Sound off">♬<span class="sound-dot"></span></button><button class="save-button" id="save-button"><span class="save-glyph">◈</span> Save game</button><button class="avatar" aria-label="Player profile">A</button></div>
     </header>
 
@@ -58,6 +59,7 @@
       window.maplibrePromise = import("https://unpkg.com/maplibre-gl@6.14.0/dist/maplibre-gl.mjs").then(module => { window.maplibregl = module; window.dispatchEvent(new Event("maplibre-ready")); }).catch(error => { window.maplibreLoadError = error; window.dispatchEvent(new Event("maplibre-ready")); });
     } catch (error) { window.maplibreLoadError = error; window.dispatchEvent(new Event("maplibre-ready")); }
   </script>
+  <script src="deployment-config.js"></script>
   <script src="support-error.js"></script>
   <script src="catalog-loader.js"></script>
 </body>

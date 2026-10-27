@@ -1,12 +1,30 @@
 (function () {
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  document.querySelectorAll('a[href^="/"]').forEach(link => {
+    const deployment = window.COPDeployment;
+    if (deployment) {
+      const path = link.getAttribute('href').replace(/^\/+/, '');
+      const pages = { 'support/': 'support/index.html', 'support/faqs': 'support/faqs.html', 'support/errors': 'support/errors.html', 'support/health': 'support/health.html' };
+      link.href = deployment.asset(pages[path] || path);
+    }
+  });
   const make = (tag, className, text) => {
     const element = document.createElement(tag);
     if (className) element.className = className;
     if (text !== undefined) element.textContent = text;
     return element;
   };
+  if (!window.COPDeployment?.backendConfigured) {
+    const notice = make('aside', 'support-error-notice', 'AI chat, ticket submission, and live service status require a separately hosted Node.js backend. FAQ and error-code references remain available from the bundled data.');
+    notice.setAttribute('role', 'status');
+    $('.page-shell')?.prepend(notice);
+    $$('[data-open-chat]').forEach(button => {
+      button.disabled = true;
+      button.title = 'Configure the hosted Node.js backend to enable the assistant.';
+      button.textContent = 'Assistant unavailable · backend required';
+    });
+  }
   let conversationId = null;
   let history = [];
 
@@ -29,8 +47,9 @@
   async function getJson(url, options) {
     let response;
     try {
-      response = await fetch(url, options);
-    } catch {
+      response = await fetch(window.COPDeployment ? window.COPDeployment.api(url) : url, options);
+    } catch (error) {
+      if (error.code === 'BACKEND_NOT_CONFIGURED') throw new SupportApiError(error);
       throw new SupportApiError({
         code: 'APP-1001',
         title: 'Support Service Unavailable',
@@ -133,7 +152,7 @@
       actions.append(again);
     }
     const faq = make('a', 'text-link', 'Browse FAQs');
-    faq.href = '/support/faqs';
+    faq.href = window.COPDeployment?.asset('support/faqs.html') || 'faqs.html';
     actions.append(faq);
     notice.append(actions);
     if (field) field.insertAdjacentElement('afterend', notice);
@@ -149,7 +168,7 @@
     form?.addEventListener('submit', event => {
       event.preventDefault();
       const query = $('#home-query', form)?.value.trim() || '';
-      location.href = `/support/faqs${query ? `?q=${encodeURIComponent(query)}` : ''}`;
+      location.href = `${window.COPDeployment?.asset('support/faqs.html') || 'faqs.html'}${query ? `?q=${encodeURIComponent(query)}` : ''}`;
     });
   }
 
@@ -157,7 +176,10 @@
     const target = $('#popular-faqs');
     if (!target) return;
     try {
-      const { faqs } = await getJson('/api/support/faqs');
+      const faqs = window.COPDeployment?.backendConfigured
+        ? (await getJson('/api/support/faqs')).faqs
+        : window.COPSupportCatalog?.FAQS;
+      if (!Array.isArray(faqs)) throw new Error('The bundled FAQ reference is unavailable.');
       target.replaceChildren();
       for (const faq of faqs.slice(0, 6)) {
         const card = make('article', 'faq-card');
@@ -180,7 +202,10 @@
     async function refresh() {
       target.replaceChildren(make('p', 'muted', 'Searching the support database…'));
       try {
-        const { faqs } = await getJson(`/api/support/faqs?q=${encodeURIComponent(search.value)}`);
+        const faqs = window.COPDeployment?.backendConfigured
+          ? (await getJson(`/api/support/faqs?q=${encodeURIComponent(search.value)}`)).faqs
+          : window.COPSupportCatalog?.FAQS?.filter(faq => `${faq.question} ${faq.answer} ${faq.category}`.toLowerCase().includes(search.value.trim().toLowerCase()));
+        if (!Array.isArray(faqs)) throw new Error('The bundled FAQ reference is unavailable.');
         const categories = [...new Set(faqs.map(faq => faq.category))].sort();
         const selected = category.value;
         category.replaceChildren(new Option('All categories', ''));
@@ -213,7 +238,10 @@
     const target = $('#error-code-list');
     if (!target) return;
     try {
-      const { errorCodes } = await getJson('/api/support/errors');
+      const errorCodes = window.COPDeployment?.backendConfigured
+        ? (await getJson('/api/support/errors')).errorCodes
+        : window.COPSupportCatalog?.ERROR_CODES;
+      if (!Array.isArray(errorCodes)) throw new Error('The bundled error-code reference is unavailable.');
       const renderCodes = query => {
         const normalized = query.trim().toLowerCase();
         const matching = errorCodes.filter(code =>
@@ -329,7 +357,7 @@
       refs.append(make('span', '', 'Help sources: '));
       references.forEach(reference => {
         const link = make('a', '', reference.question);
-        link.href = `/support/faqs?q=${encodeURIComponent(reference.question)}`;
+        link.href = `${window.COPDeployment?.asset('support/faqs.html') || 'faqs.html'}?q=${encodeURIComponent(reference.question)}`;
         refs.append(link);
       });
       item.append(refs);

@@ -24,4 +24,5 @@ const ERROR_CODES = Object.freeze([
   { code: 'APP-1001', title: 'Support Service Temporarily Unavailable', explanation: 'The support assistant or ticket service is currently unavailable. The rest of the site may still work.', causes: ['The AI provider is offline.', 'A support dependency could not be reached.'], steps: ['Try the FAQ search while the assistant is unavailable.', 'Check the health page.', 'Retry later or submit a ticket when the ticket service is available.'] }
 ]);
 
-module.exports = { FAQS, ERROR_CODES };
+if (typeof window !== 'undefined') window.COPSupportCatalog = { FAQS, ERROR_CODES };
+if (typeof module !== 'undefined' && module.exports) module.exports = { FAQS, ERROR_CODES };

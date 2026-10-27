@@ -14,6 +14,8 @@ test('Express serves the map app and exposes the local Ollama health endpoint',a
   const gameHealth=await fetch(`${base}/api/game/health`);assert.equal(gameHealth.status,200);assert.equal((await gameHealth.json()).ok,true);
   const page=await fetch(`${base}/index.html`);assert.equal(page.status,200);const html=await page.text();assert.match(html,/id="world-map"/);assert.match(html,/catalog-loader\.js/);
   assert.match(html,/support-error\.js/);
+  const config=await fetch(`${base}/deployment-config.js`);assert.equal(config.status,200);assert.match(await config.text(),/backendConfigured:true/);
+  const staticData=await fetch(`${base}/data/history-events.json`);assert.equal(staticData.status,200);assert.match(staticData.headers.get('content-type'),/json/);
 });
 test('game AI health preserves 503 and returns safe troubleshooting details when Ollama is unavailable',async t=>{
   const ai=createAIService({events:[event],fetchImpl:async()=>{throw new TypeError('private connection diagnostic');}}),base=await withServer(t,ai);

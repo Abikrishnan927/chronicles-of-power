@@ -3,6 +3,7 @@
   const pages = new Map();
   const loadedScripts = new Set();
   const scripts = ['catalog-index.js', 'campaign-data.js', 'engine.js', 'universal-scenarios.js', 'app.js', 'ai-ui.js'];
+  let staticEventsPromise = null;
   let total = null;
   let running = false;
 
@@ -35,29 +36,51 @@
     ask.textContent = 'ASK SUPPORT ASSISTANT';
     ask.href = window.COPSupportErrorLink
       ? window.COPSupportErrorLink({ ...failure, currentPage: location.pathname }, 'loading the historical catalogue')
-      : '/support/';
+      : window.COPDeployment?.asset('support/index.html') || 'support/index.html';
     const reference = document.createElement('a');
-    reference.href = '/support/errors';
+    reference.href = window.COPDeployment?.asset('support/errors.html') || 'support/errors.html';
     reference.textContent = 'ERROR CODE GUIDE';
     actions.append(ask, reference);
     loader.append(actions);
   }
 
   async function fetchPage(offset) {
-    const response = await fetch(`/api/history/events?offset=${offset}&limit=${pageSize}`);
     let page;
-    try {
-      page = await response.json();
-    } catch {
-      throw Object.assign(new Error(`The catalogue server returned an unreadable HTTP ${response.status} response.`), {
-        code: String(response.status),
-        title: 'Invalid Server Response',
-        retryable: response.status >= 500
-      });
-    }
-    if (!response.ok) {
-      const source = page?.error && typeof page.error === 'object' ? page.error : page;
-      throw Object.assign(new Error(source.message || `Catalogue request failed (${response.status}).`), source);
+    if (window.COPDeployment?.backendConfigured) {
+      const url = window.COPDeployment.api(`api/history/events?offset=${offset}&limit=${pageSize}`);
+      const response = await fetch(url);
+      try {
+        page = await response.json();
+      } catch {
+        throw Object.assign(new Error(`The catalogue server returned an unreadable HTTP ${response.status} response.`), {
+          code: String(response.status),
+          title: 'Invalid Server Response',
+          retryable: response.status >= 500
+        });
+      }
+      if (!response.ok) {
+        const source = page?.error && typeof page.error === 'object' ? page.error : page;
+        throw Object.assign(new Error(source.message || `Catalogue request failed (${response.status}).`), source);
+      }
+    } else {
+      staticEventsPromise ||= fetch(window.COPDeployment?.asset('data/history-events.json') || 'data/history-events.json')
+        .then(response => {
+          if (!response.ok) throw Object.assign(new Error(`Static catalogue request failed (HTTP ${response.status}).`), { status: response.status });
+          return response.json();
+        })
+        .then(events => {
+          if (!Array.isArray(events) || events.some(event => !event || typeof event.id !== 'string')) {
+            throw new Error('The static catalogue is malformed; expected an array of identified event records.');
+          }
+          const ids = new Set(events.map(event => event.id));
+          if (ids.size !== events.length) throw new Error(`Static catalogue integrity check failed: ${ids.size} unique IDs for ${events.length} records.`);
+          return events;
+        }).catch(error => {
+          staticEventsPromise = null;
+          throw error;
+        });
+      const events = await staticEventsPromise;
+      page = { events: events.slice(offset, offset + pageSize), total: events.length, offset, limit: pageSize };
     }
     if (!Array.isArray(page.events) || !Number.isSafeInteger(page.total) || page.offset !== offset ||
         page.events.length !== Math.min(pageSize, Math.max(0, page.total - offset))) {

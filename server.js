@@ -13,6 +13,10 @@ function createServer({ai=createAIService({events:loadEvents()}),support={}}={})
   app.disable('x-powered-by');
   app.use(createSupportRequestLogger(support.logger));
   app.use(express.json({limit:'32kb',strict:true}));
+  app.get('/deployment-config.js',(req,res)=>{
+    const backendBaseUrl=process.env.PUBLIC_API_BASE_URL||'';
+    res.type('application/javascript').send(`window.COPDeployment=Object.freeze({basePath:new URL('.',document.currentScript.src).pathname,backendConfigured:true,backendBaseUrl:${JSON.stringify(backendBaseUrl)},asset(path){return new URL(String(path).replace(/^\\/+/,''),location.origin+this.basePath).href;},api(path){const base=this.backendBaseUrl||location.origin;return new URL(String(path).replace(/^\\/+/,''),base.replace(/\\/+$/,'')+'/').href;}});`);
+  });
   createSupportRoutes(app,support);
   const importedEvents=loadImportedEvents();
   app.get('/api/history/events',(req,res)=>{
